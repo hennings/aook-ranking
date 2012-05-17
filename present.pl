@@ -9,7 +9,7 @@ use Data::Dumper;
 use setup;
 our $dbh;
 
-my ($race_id)=@ARGV;
+my ($series_id)=@ARGV;
 
 my $persons;
 my $st1 = $dbh->prepare("select distinct p.id, p.family_name, p.given_name, p.club, r.class from person p, result r where p.id=r.person_id");
@@ -21,10 +21,13 @@ while (my $h = $st1->fetchrow_hashref) {
 my $results;
 
 my $straces = $dbh->prepare("select race_id from series_race where series_id=? order by id");
-$straces->execute($race_id);
+$straces->execute($series_id);
 my @races;
+my %races;
+my $n = 0;
 while (my $h = $straces->fetchrow_arrayref()) {
   push @races, $h->[0];
+  $races{$h->[0]}=$n++;
 }
 
 my $stclasses = $dbh->prepare("select name from class");
@@ -36,7 +39,7 @@ while (my $h = $stclasses->fetchrow_arrayref()) {
 
 
 my $st2 = $dbh->prepare("select r.status, r.person_id, r.race_id, r.class, r.time_sec, r.time, r.points from result r, series_race sr, series s where r.race_id=sr.race_id and sr.series_id=s.id and s.id=?");
-$st2->execute($race_id);
+$st2->execute($series_id);
 
 my $p_in_class;
 
@@ -44,8 +47,9 @@ while (my $h = $st2->fetchrow_hashref) {
   if (!defined $results->{$h->{id}}) {
     $results->{$h->{person_id}}={};
     $p_in_class->{$h->{class}}->{$h->{person_id}}++;
-    push @{$persons->{$h->{person_id}}->{points}}, $h->{points};
-    push @{$persons->{$h->{person_id}}->{times}}, $h->{time};
+    my $nr = $races{$h->{race_id}};
+    @{$persons->{$h->{person_id}}->{points}}->[$nr]= $h->{points};
+    @{$persons->{$h->{person_id}}->{times}} ->[$nr]= $h->{time};
   }
   $results->{$h->{person_id}}->{$h->{race_id}} = $h;
 }
@@ -106,7 +110,7 @@ footer {
         table.formatHTML5 tbody tr:nth-child(even) {
             background-color: #efefef;
         }
-        table.formatHTML5 td.number { text-align: right; width:5ex; padding-left: 1ex; }
+        table.formatHTML5 td.number { text-align: right; width:7ex; padding-left: 1ex; }
         table.formatHTML5 td.name { width: 20em; }
         table.formatHTML5 td.club { width: 10em; }
  </style>
@@ -114,6 +118,9 @@ EOF
 print "</head><body><div id=\"main\">\n";
 
 print "<h2>Unionsmatch 2012 - Rangering etter to l&oslash;p</h2>\n";
+print "<p>Rapport&eacute;r feil til <a href=\"mailto:henning\@spjelkavik.net?subject=Feil%20i%20ranking\">Henning Spjelkavik</a> (IL Tyrving)\n</p>";
+print "<p><a href=\"#H13-14\">H13-14</a> <a href=\"#D13-14\">D13-14</a> <a href=\"#H15-16\">D15-16</a> <a href=\"#D15-16\">D15-16</a></p>\n";
+
 
 foreach my $cl (@classes) {
   print "<div id=\"$cl\"><h3>$cl</h3>\n";
@@ -130,13 +137,19 @@ foreach my $cl (@classes) {
   print "<table class='result formatHTML5'>\n";
   print "<caption>Resultater for $cl</caption>\n";
   print "<colgroup /><colgroup/><colgroup span=\"3\"/><colgroup />\n";
-  print "<thead><tr><th>Navn</th><th>Klubb</th><th colspan=\"3\">Poeng</th><th>Sum</th></tr></thead><tbody>\n";
+  print "<thead><tr><th></th><th>Navn</th><th>Klubb</th><th colspan=\"3\">Poeng</th><th>Sum</th></tr></thead><tbody>\n";
   my $n = 0;
+  my $prevsum = 0;
+  my $place = 0;
   foreach my $pid (@persons_ordered) {
     $n++;
     my $nmod=$n%2;
     my $p = $persons->{$pid};
-    printf "<tr><td class=\"name\">%s</td><td class=\"club\">%s</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\">%.1f</td></tr>\n", "$p->{given_name} $p->{family_name}",$p->{club},
+    if ( $prevsum != $p->{sum} ) {
+      $place = $n;
+    }
+    $prevsum = $p->{sum};
+    printf "<tr><td class=\"number\">%d.</td><td class=\"name\">%s</td><td class=\"club\">%s</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\" title=\"%s\">%.1f</td><td class=\"number\">%.1f</td></tr>\n", $place, "$p->{given_name} $p->{family_name}",$p->{club},
       $p->{times}->[0],$p->{points}->[0],
       $p->{times}->[1],$p->{points}->[1],
       $p->{times}->[2],$p->{points}->[2],
