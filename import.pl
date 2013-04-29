@@ -8,7 +8,7 @@ use XML::XPath;
 use setup;
 our $dbh;
 
-my ($file, $race_id, $class, $classInFile) = @ARGV;
+my ($file, $race_id, $class, $classInFile, $eventRaceId) = @ARGV;
 
 print "** Importing $race_id / $class from $file\n";
 
@@ -33,9 +33,27 @@ foreach my $node ($ns->get_nodelist) {
   my $id = $node->findvalue("Person/PersonId");
   my $club = $node->findvalue("Organisation/Name");
   my $clubId = $node->findvalue("Organisation/OrganisationId");
-  my $time = $node->findvalue("Result/Time");
-  my @status = $node->findnodes("Result/CompetitorStatus")->get_nodelist;
-  my $status = $status[0]->getAttribute("value");
+
+  my $time; my @status; my $status;
+
+  if (defined $eventRaceId) {
+      $time = $node->findvalue("RaceResult[EventRace/EventRaceId=$eventRaceId]/Result/Time");
+      @status = $node->findnodes("RaceResult[EventRace/EventRaceId=$eventRaceId]/Result/CompetitorStatus")->get_nodelist;
+      if (!@status) {
+	  warn "Problems with runner: $given $famname ($id)\n";
+	  next;
+      }
+      $status = $status[0]->getAttribute("value");
+  } else {
+      $time = $node->findvalue("Result/Time");
+      @status = $node->findnodes("Result/CompetitorStatus")->get_nodelist;
+      if (!@status) {
+	  warn "Problems with runner: $given $famname ($id)\n";
+	  next;
+      }
+      $status = $status[0]->getAttribute("value");
+  }
+
 
   next unless $aookClub{$clubId};
 
