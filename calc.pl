@@ -43,7 +43,7 @@ foreach (@ordered) {
 
 my $avg = $sum/$n;
 
-print "Avg: $avg\n";
+print "Avg: $avg seconds\n";
 
 my $stu = $dbh->prepare("update result set points=? where id=?");
 
