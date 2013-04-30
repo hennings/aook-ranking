@@ -36,11 +36,13 @@ foreach my $node ($ns->get_nodelist) {
 
   my $time; my @status; my $status;
 
+  next unless $aookClub{$clubId};
+
   if (defined $eventRaceId) {
       $time = $node->findvalue("RaceResult[EventRace/EventRaceId=$eventRaceId]/Result/Time");
       @status = $node->findnodes("RaceResult[EventRace/EventRaceId=$eventRaceId]/Result/CompetitorStatus")->get_nodelist;
       if (!@status) {
-	  warn "Problems with runner: $given $famname ($id)\n";
+	  warn "*** Problems with runner, no status in the race: $given $famname - $club ($id)\n";
 	  next;
       }
       $status = $status[0]->getAttribute("value");
@@ -48,14 +50,16 @@ foreach my $node ($ns->get_nodelist) {
       $time = $node->findvalue("Result/Time");
       @status = $node->findnodes("Result/CompetitorStatus")->get_nodelist;
       if (!@status) {
-	  warn "Problems with runner: $given $famname ($id)\n";
+	  warn "*** Problems with runner, no status: $given $famname ($id)\n";
 	  next;
       }
       $status = $status[0]->getAttribute("value");
   }
 
-
-  next unless $aookClub{$clubId};
+  if (!$id) {
+      $id = int(100000 + rand(1000000));
+      warn "*** No person Id! $given $famname , $club => using $id "  ;
+  }
 
   my $myId;
   $stf->execute($id);

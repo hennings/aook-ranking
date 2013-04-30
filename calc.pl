@@ -41,6 +41,8 @@ foreach (@ordered) {
   }
 }
 
+die "No results?! / $class / $race_id   " if ($n==0);
+
 my $avg = $sum/$n;
 
 print "Avg: $avg seconds\n";
