@@ -124,7 +124,7 @@ print "</head><body><div id=\"main\">\n";
 
 print "<h2>".$series->{name}." - Rangering etter ".scalar(@races)." l&oslash;p</h2>\n";
 print "<p>Rapport&eacute;r feil til <a href=\"mailto:henning\@spjelkavik.net?subject=Feil%20i%20ranking\">Henning Spjelkavik</a> (IL Tyrving)\n</p>";
-print "<p><a href=\"#H13-14\">H13-14</a> <a href=\"#D13-14\">D13-14</a> <a href=\"#H15-16\">D15-16</a> <a href=\"#D15-16\">D15-16</a></p>\n";
+print "<p><a href=\"#H13-14\">H13-14</a> <a href=\"#D13-14\">D13-14</a> <a href=\"#H15-16\">H15-16</a> <a href=\"#D15-16\">D15-16</a></p>\n";
 
 
 foreach my $cl (@classes) {

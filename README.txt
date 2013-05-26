@@ -5,8 +5,8 @@ AOOK API-nøkkel: 8c9ffc05a6c44fdc8a26a0daefce4bfa
  curl -H "ApiKey:8c9ffc05a6c44fdc8a26a0daefce4bfa" --insecure "https://eventor.orientering.no/api/organisation/apiKey" | xmllint.exe --format -
 
 
-curl -H "ApiKey:8c9ffc05a6c44fdc8a26a0daefce4bfa" --insecure
-"https://eventor.orientering.no/api/results/event?eventId=2007" | xmllint
+curl -H "ApiKey:8c9ffc05a6c44fdc8a26a0daefce4bfa" --insecure \
+"https://eventor.orientering.no/api/results/event?eventId=2007" | xmllint \
 --format - > data/nydalten-2013.xml
 
 
