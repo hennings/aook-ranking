@@ -120,6 +120,9 @@ footer {
         table.formatHTML5 td.club { width: 10em; }
  </style>
 EOF
+
+print "<title>".$series->{name}." - Rangering etter ".scalar(@races)." l&oslash;p</title>\n";
+
 print "</head><body><div id=\"main\">\n";
 
 print "<h2>".$series->{name}." - Rangering etter ".scalar(@races)." l&oslash;p</h2>\n";
